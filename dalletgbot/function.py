@@ -2,11 +2,9 @@ import contextlib
 import os
 import random
 
+import functions_framework
 import openai
 import requests
-from flask import Flask
-from flask import Response
-from flask import request
 
 
 def getenv(key):
@@ -23,7 +21,6 @@ def getenv(key):
 openai.api_key = getenv("OPENAI_API_KEY")
 tg_token = getenv("TG_TOKEN")
 
-app = Flask(__name__)
 rand = random.Random()
 
 
@@ -87,17 +84,20 @@ class Responses:
         requests.post(url, json=payload)
 
 
-@app.route('/', methods=['POST'])
-def generate_images():
+@functions_framework.http
+def generate_images(request):
+    do_generate_images(request)
+
+
+def do_generate_images(request):
     msg = request.get_json()
     print('msg', msg)
 
+    do_generate_images(msg)
     if 'message' in msg and 'text' in msg['message']:
         respond_message(msg)
     elif 'inline_query' in msg and 'query' in msg['inline_query']:
         respond_inline(msg)
-
-    return Response('ok', status=200)
 
 
 def respond_message(msg):
@@ -132,7 +132,3 @@ def respond_inline(msg):
 
     images = Requests.generate(query)
     Responses.answer_inline(query_id, images)
-
-
-if __name__ == '__main__':
-    app.run(port=5002, debug=True)

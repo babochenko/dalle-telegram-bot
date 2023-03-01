@@ -1,7 +1,0 @@
-# contains properties of the Telegram bot. This file is not
-# executed at any stage - it's here just for documentation purpose
-name: DALL·E Bot
-handle: @dalle_tgbot
-description: Generates images via DALL·E 2 AI
-about: Bot that uses DALL·E 2 AI to generate realistic images and
-  art from a description in natural language.
