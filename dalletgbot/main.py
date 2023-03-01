@@ -25,7 +25,10 @@ rand = random.Random()
 
 class Requests:
     @staticmethod
-    def generate(query):
+    def generate(query, **ctx):
+        if not ctx:
+            ctx = {}
+
         response = openai.Image.create(
             prompt=query,
             n=1,
@@ -33,7 +36,7 @@ class Requests:
         )
 
         images = [data['url'] for data in response['data']]
-        print('query:', query, ', images:', images)
+        print({**ctx, 'query': query, 'images': images})
         return images
 
 
@@ -104,7 +107,7 @@ def respond_message(msg):
         return
 
     with Responses.pretend_typing(chat_id):
-        images = Requests.generate(query)
+        images = Requests.generate(query, ctx={'chat_id': chat_id})
         for idx, image in enumerate(images):
             Responses.send_photo(chat_id, image)
 
@@ -125,5 +128,5 @@ def respond_inline(msg):
     if not query:
         return
 
-    images = Requests.generate(query)
+    images = Requests.generate(query, ctx={'query_id': query_id})
     Responses.answer_inline(query_id, images)
