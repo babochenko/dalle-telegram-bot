@@ -92,6 +92,8 @@ def generate_images(request):
     elif 'inline_query' in msg and 'query' in msg['inline_query']:
         respond_inline(msg)
 
+    return 'ok'
+
 
 def respond_message(msg):
     query = msg['message']['text']
