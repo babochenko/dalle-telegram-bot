@@ -33,6 +33,7 @@ class Requests:
         )
 
         images = [data['url'] for data in response['data']]
+        print('query:', query, ', images:', images)
         return images
 
 
@@ -85,7 +86,6 @@ class Responses:
 
 def generate_images(request):
     msg = request.get_json()
-    print('msg', msg)
 
     if 'message' in msg and 'text' in msg['message']:
         respond_message(msg)
