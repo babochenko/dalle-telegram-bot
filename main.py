@@ -8,8 +8,20 @@ from flask import Flask
 from flask import Response
 from flask import request
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
-tg_token = os.getenv("TG_TOKEN")
+
+def getenv(key):
+    keys = {
+        "OPENAI_API_KEY": 'key for accessing dalle api',
+        "TG_TOKEN": 'telegram bot token',
+    }
+    if key not in keys.keys():
+        raise f'cannot find key {key} in keys {keys.keys()}'
+
+    return os.getenv(key)
+
+
+openai.api_key = getenv("OPENAI_API_KEY")
+tg_token = getenv("TG_TOKEN")
 
 app = Flask(__name__)
 rand = random.Random()
