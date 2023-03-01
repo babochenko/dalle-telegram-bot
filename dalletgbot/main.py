@@ -29,11 +29,14 @@ class Requests:
         if not ctx:
             ctx = {}
 
-        response = openai.Image.create(
-            prompt=query,
-            n=1,
-            size="1024x1024"
-        )
+        try:
+            response = openai.Image.create(
+                prompt=query,
+                n=1,
+                size="1024x1024"
+            )
+        except:
+            return None
 
         images = [data['url'] for data in response['data']]
         print({**ctx, 'query': query, 'images': images})
@@ -111,6 +114,11 @@ def respond_message(msg):
 
     with Responses.pretend_typing(chat_id):
         images = Requests.generate(query, ctx={'chat_id': chat_id})
+        if not images:
+            Responses.send_message(chat_id, 'Your request was rejected as a result of our safety system. Your prompt '
+                                            'may contain text that is not allowed by our safety system.')
+            return
+
         for idx, image in enumerate(images):
             Responses.send_photo(chat_id, image)
 
@@ -132,4 +140,6 @@ def respond_inline(msg):
         return
 
     images = Requests.generate(query, ctx={'query_id': query_id})
+    if not images:
+        return
     Responses.answer_inline(query_id, images)
