@@ -83,7 +83,10 @@ class Responses:
         requests.post(url, json=payload)
 
 
-def generate_images(msg):
+def generate_images(request):
+    msg = request.get_json()
+    print('msg', msg)
+
     if 'message' in msg and 'text' in msg['message']:
         respond_message(msg)
     elif 'inline_query' in msg and 'query' in msg['inline_query']:

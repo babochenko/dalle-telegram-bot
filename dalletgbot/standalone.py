@@ -8,10 +8,7 @@ app = Flask(__name__)
 
 @app.route('/', methods=['POST'])
 def handle_request():
-    msg = request.get_json()
-    print('msg', msg)
-
-    generate_images(msg)
+    generate_images(request)
     return Response('ok', status=200)
 
 
