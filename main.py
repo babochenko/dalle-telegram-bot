@@ -104,17 +104,23 @@ def respond_message(msg):
     query = msg['message']['text']
     chat_id = msg['message']['chat']['id']
 
-    if query == '/start':
-        with Responses.pretend_typing(chat_id):
-            Responses.send_message(chat_id, "Hello! This bot will generate images using DALL·E 2 based on your queries."
-                                            "Simply describe the image you want - for example, you can try typing "
-                                            "'sunset' or 'cat'.")
+    if query.startswith('/'):
+        respond_command(chat_id, query)
         return
 
     with Responses.pretend_typing(chat_id):
         images = Requests.generate(query)
         for idx, image in enumerate(images):
             Responses.send_photo(chat_id, image)
+
+
+def respond_command(chat_id, query):
+    if query == '/start' or query == '/help':
+        with Responses.pretend_typing(chat_id):
+            Responses.send_message(chat_id, "Hello! This bot will generate images using DALL·E 2 based on your queries."
+                                            "Simply describe the image you want - for example, you can try typing "
+                                            "'sunset' or 'cat'.")
+        return
 
 
 def respond_inline(msg):
