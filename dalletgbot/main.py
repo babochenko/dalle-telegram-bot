@@ -90,10 +90,13 @@ class Responses:
 def generate_images(request):
     msg = request.get_json()
 
-    if 'message' in msg and 'text' in msg['message']:
-        respond_message(msg)
-    elif 'inline_query' in msg and 'query' in msg['inline_query']:
-        respond_inline(msg)
+    try:
+        if 'message' in msg and 'text' in msg['message']:
+            respond_message(msg)
+        elif 'inline_query' in msg and 'query' in msg['inline_query']:
+            respond_inline(msg)
+    finally:
+        pass
 
     return 'ok'
 
