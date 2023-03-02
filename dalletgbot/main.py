@@ -1,4 +1,5 @@
 import contextlib
+import datetime
 import os
 import random
 
@@ -21,6 +22,7 @@ openai.api_key = getenv("OPENAI_API_KEY")
 tg_token = getenv("TG_TOKEN")
 
 rand = random.Random()
+img_price = 0.002
 
 
 class Requests:
@@ -35,12 +37,28 @@ class Requests:
                 n=1,
                 size="1024x1024"
             )
-        except:
+        except Exception as e:
+            print(e)
             return None
 
         images = [data['url'] for data in response['data']]
         print({**ctx, 'query': query, 'images': images})
         return images
+
+    @staticmethod
+    def get_remaining_credit():
+        resp = requests.get('https://api.openai.com/dashboard/billing/credit_grants', headers={
+            'Authorization': f'Bearer {openai.api_key}'
+        }).json()
+        grant = resp['grants']['data'][0]
+
+        token_sum = grant['grant_amount'] - grant['used_amount']
+        tokens = token_sum / img_price
+
+        expiration_seconds = int(grant['expires_at'])
+        expiration = datetime.datetime.fromtimestamp(expiration_seconds).strftime('%B %-d, %Y')
+
+        return tokens, expiration
 
 
 class Responses:
@@ -129,7 +147,11 @@ def respond_command(chat_id, query):
             Responses.send_message(chat_id, "Hello! This bot will generate images using DALL·E 2 based on your queries."
                                             "Simply describe the image you want - for example, you can try typing "
                                             "'sunset' or 'cat'.")
-        return
+    elif query == '/tokens':
+        with Responses.pretend_typing(chat_id):
+            tokens, expiration = Requests.get_remaining_credit()
+            Responses.send_message(chat_id, f"You have {tokens} remaining token(s) to spend"
+                                            f"until {expiration}")
 
 
 def respond_inline(msg):
