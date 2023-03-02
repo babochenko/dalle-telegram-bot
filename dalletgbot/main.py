@@ -53,7 +53,7 @@ class Requests:
         grant = resp['grants']['data'][0]
 
         token_sum = grant['grant_amount'] - grant['used_amount']
-        tokens = token_sum / img_price
+        tokens = int(token_sum / img_price)
 
         expiration_seconds = int(grant['expires_at'])
         expiration = datetime.datetime.fromtimestamp(expiration_seconds).strftime('%B %-d, %Y')
@@ -150,7 +150,7 @@ def respond_command(chat_id, query):
     elif query == '/tokens':
         with Responses.pretend_typing(chat_id):
             tokens, expiration = Requests.get_remaining_credit()
-            Responses.send_message(chat_id, f"You have {tokens} remaining token(s) to spend"
+            Responses.send_message(chat_id, f"You have {tokens} remaining token(s) to spend "
                                             f"until {expiration}")
 
 
