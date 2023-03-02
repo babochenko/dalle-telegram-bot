@@ -22,7 +22,7 @@ openai.api_key = getenv("OPENAI_API_KEY")
 tg_token = getenv("TG_TOKEN")
 
 rand = random.Random()
-img_price = 0.002
+img_price = 0.02
 
 
 class Requests:
