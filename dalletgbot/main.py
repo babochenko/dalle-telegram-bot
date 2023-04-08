@@ -5,6 +5,7 @@ import random
 
 import openai
 import requests
+from openai import InvalidRequestError
 
 
 def getenv(key):
@@ -37,13 +38,15 @@ class Requests:
                 n=1,
                 size="1024x1024"
             )
-        except Exception as e:
+        except InvalidRequestError as e:
             print(e)
-            return None
+            return None, str(e)
+        except Exception as e:
+            raise e
 
         images = [data['url'] for data in response['data']]
         print({**ctx, 'query': query, 'images': images})
-        return images
+        return images, None
 
     @staticmethod
     def get_remaining_credit():
@@ -131,10 +134,9 @@ def respond_message(msg):
         return
 
     with Responses.pretend_typing(chat_id):
-        images = Requests.generate(query, ctx={'chat_id': chat_id})
-        if not images:
-            Responses.send_message(chat_id, 'Your request was rejected as a result of our safety system. Your prompt '
-                                            'may contain text that is not allowed by our safety system.')
+        images, err = Requests.generate(query, ctx={'chat_id': chat_id})
+        if err:
+            Responses.send_message(chat_id, err)
             return
 
         for idx, image in enumerate(images):
@@ -161,7 +163,7 @@ def respond_inline(msg):
     if not query:
         return
 
-    images = Requests.generate(query, ctx={'query_id': query_id})
-    if not images:
+    images, err = Requests.generate(query, ctx={'query_id': query_id})
+    if err:
         return
     Responses.answer_inline(query_id, images)
