@@ -42,7 +42,8 @@ class Requests:
             print(e)
             return None, str(e)
         except Exception as e:
-            raise e
+            print(e)
+            return None, 'Internal server error'
 
         images = [data['url'] for data in response['data']]
         print({**ctx, 'query': query, 'images': images})
