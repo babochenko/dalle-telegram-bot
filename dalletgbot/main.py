@@ -51,9 +51,16 @@ class Requests:
 
     @staticmethod
     def get_remaining_credit():
-        resp = requests.get('https://api.openai.com/dashboard/billing/credit_grants', headers={
-            'Authorization': f'Bearer {openai.api_key}'
-        }).json()
+        try:
+            resp = requests.get('https://api.openai.com/dashboard/billing/credit_grants', headers={
+                'Authorization': f'Bearer {openai.api_key}'
+            }).json()
+        except InvalidRequestError as e:
+            print(e)
+            return None, None, str(e)
+        except Exception as e:
+            print(e)
+            return None, None, 'Internal server error'
         grant = resp['grants']['data'][0]
 
         token_sum = grant['grant_amount'] - grant['used_amount']
@@ -62,7 +69,7 @@ class Requests:
         expiration_seconds = int(grant['expires_at'])
         expiration = datetime.datetime.fromtimestamp(expiration_seconds).strftime('%B %-d, %Y')
 
-        return tokens, expiration
+        return tokens, expiration, None
 
 
 class Responses:
@@ -152,7 +159,11 @@ def respond_command(chat_id, query):
                                             "'sunset' or 'cat'.")
     elif query == '/tokens':
         with Responses.pretend_typing(chat_id):
-            tokens, expiration = Requests.get_remaining_credit()
+            tokens, expiration, err = Requests.get_remaining_credit()
+            if err:
+                Responses.send_message(chat_id, err)
+                return
+
             Responses.send_message(chat_id, f"You have {tokens} remaining token(s) to spend "
                                             f"until {expiration}")
 
